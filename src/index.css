@@ -1,0 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-headline: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    @apply font-sans antialiased bg-white text-black;
+  }
+}
+
+.uber-input {
+  @apply bg-[#F6F6F6] border-b-2 border-transparent focus:border-black text-black px-4 py-3 text-sm font-medium transition-all outline-none;
+}
+
+.base-table-row {
+  @apply transition-colors duration-150 hover:bg-[#F6F6F6];
+}

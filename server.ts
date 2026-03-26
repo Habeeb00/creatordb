@@ -44,7 +44,12 @@ const apifyClient = process.env.APIFY_API_TOKEN ? new ApifyClient({
 }) : null;
 
 // Google Sheets Auth
-const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+// Google Sheets Auth - Production-Robust Key Parsing
+const privateKey = process.env.GOOGLE_PRIVATE_KEY 
+  ? process.env.GOOGLE_PRIVATE_KEY
+      .replace(/^['"](.*)['"]$/, '$1') // Remove wrapping quotes
+      .replace(/\\n/g, '\n')           // Replace escaped \n with true newlines
+  : undefined;
 
 if (process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL && !privateKey) {
   console.warn("GOOGLE_SERVICE_ACCOUNT_EMAIL is set but GOOGLE_PRIVATE_KEY is missing or empty.");

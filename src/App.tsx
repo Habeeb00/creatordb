@@ -25,7 +25,8 @@ import {
   Check,
   ArrowUp,
   ArrowDown,
-  ArrowUpDown
+  ArrowUpDown,
+  Menu
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Toaster, toast } from 'sonner';
@@ -33,7 +34,7 @@ import { cn, formatNumber, GENRES, LOCATIONS, INFLUENCER_SIZES, type Creator } f
 
 // --- Components ---
 
-const Sidebar = ({ activeTab, setActiveTab }: { activeTab: string, setActiveTab: (t: string) => void }) => {
+const Sidebar = ({ activeTab, setActiveTab, isOpen, onClose }: { activeTab: string, setActiveTab: (t: string) => void, isOpen: boolean, onClose: () => void }) => {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'creators', label: 'Creators', icon: Users },
@@ -43,68 +44,94 @@ const Sidebar = ({ activeTab, setActiveTab }: { activeTab: string, setActiveTab:
   ];
 
   return (
-    <aside className="h-screen w-64 fixed left-0 top-0 bg-[#F9F9F9] border-r border-gray-100 flex flex-col py-8 z-50">
-      <div className="px-6 mb-10">
-        <h1 className="text-xl font-black text-black tracking-tighter uppercase">The Curator</h1>
-        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Precision Suite</p>
-      </div>
-      
-      <nav className="flex-1">
-        <div className="px-6 mb-4">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Main Menu</p>
-        </div>
-        {menuItems.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => setActiveTab(item.id)}
-            className={cn(
-              "w-full px-6 py-3 flex items-center gap-3 transition-all duration-200 border-l-4",
-              activeTab === item.id 
-                ? "bg-white text-[#276EF1] border-[#276EF1]" 
-                : "text-gray-600 border-transparent hover:bg-gray-200"
-            )}
-          >
-            <item.icon size={20} />
-            <span className="text-[11px] font-bold uppercase tracking-widest">{item.label}</span>
-          </button>
-        ))}
-      </nav>
+    <>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 bg-black/40 z-[50] md:hidden backdrop-blur-sm"
+          />
+        )}
+      </AnimatePresence>
 
-      <div className="px-6 pt-6 border-t border-gray-100 space-y-1">
-        <button className="w-full text-gray-500 py-2 flex items-center gap-3 hover:text-black transition-colors">
-          <Settings size={18} />
-          <span className="text-[11px] font-bold uppercase tracking-widest">Settings</span>
-        </button>
-        <button className="w-full text-gray-500 py-2 flex items-center gap-3 hover:text-black transition-colors">
-          <HelpCircle size={18} />
-          <span className="text-[11px] font-bold uppercase tracking-widest">Support</span>
-        </button>
-      </div>
-    </aside>
+      <aside className={cn(
+        "h-screen w-64 fixed left-0 top-0 bg-[#F9F9F9] border-r border-gray-100 flex flex-col py-8 z-[51] transition-transform duration-300 ease-in-out md:translate-x-0",
+        isOpen ? "translate-x-0" : "-translate-x-full"
+      )}>
+        <div className="px-6 mb-10 flex justify-between items-center">
+          <div>
+            <h1 className="text-xl font-black text-black tracking-tighter uppercase">The Curator</h1>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Precision Suite</p>
+          </div>
+          <button onClick={onClose} className="md:hidden p-2 text-gray-400 hover:text-black">
+            <X size={20} />
+          </button>
+        </div>
+        
+        <nav className="flex-1">
+          <div className="px-6 mb-4">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Main Menu</p>
+          </div>
+          {menuItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => { setActiveTab(item.id); onClose(); }}
+              className={cn(
+                "w-full px-6 py-3 flex items-center gap-3 transition-all duration-200 border-l-4",
+                activeTab === item.id 
+                  ? "bg-white text-[#276EF1] border-[#276EF1]" 
+                  : "text-gray-600 border-transparent hover:bg-gray-200"
+              )}
+            >
+              <item.icon size={20} />
+              <span className="text-[11px] font-bold uppercase tracking-widest">{item.label}</span>
+            </button>
+          ))}
+        </nav>
+
+        <div className="px-6 pt-6 border-t border-gray-100 space-y-1">
+          <button className="w-full text-gray-500 py-2 flex items-center gap-3 hover:text-black transition-colors">
+            <Settings size={18} />
+            <span className="text-[11px] font-bold uppercase tracking-widest">Settings</span>
+          </button>
+          <button className="w-full text-gray-500 py-2 flex items-center gap-3 hover:text-black transition-colors">
+            <HelpCircle size={18} />
+            <span className="text-[11px] font-bold uppercase tracking-widest">Support</span>
+          </button>
+        </div>
+      </aside>
+    </>
   );
 };
 
-const Header = ({ onAddClick }: { onAddClick: () => void }) => {
+const Header = ({ onAddClick, onMenuClick }: { onAddClick: () => void, onMenuClick: () => void }) => {
   return (
-    <header className="fixed top-0 right-0 w-[calc(100%-16rem)] h-16 z-40 bg-white border-b border-gray-100 flex justify-between items-center px-8">
-      <div className="flex items-center w-full max-w-lg">
-        <div className="w-full relative">
+    <header className="fixed top-0 right-0 w-full md:w-[calc(100%-16rem)] h-16 z-40 bg-white border-b border-gray-100 flex justify-between items-center px-4 md:px-8">
+      <div className="flex items-center w-full max-w-lg gap-4">
+        <button onClick={onMenuClick} className="md:hidden p-2 text-gray-500 hover:text-black transition-colors">
+          <Menu size={24} />
+        </button>
+        <div className="hidden sm:block w-full relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
           <input 
             className="w-full bg-[#F6F6F6] border-none py-2 pl-10 pr-4 text-sm font-medium focus:ring-0 focus:bg-gray-100 transition-all placeholder:text-gray-400" 
-            placeholder="Search database intelligence..." 
+            placeholder="Search database..." 
           />
         </div>
+        <h1 className="sm:hidden text-lg font-black uppercase tracking-tighter">TC</h1>
       </div>
-      <div className="flex items-center space-x-6">
-        <button className="bg-black text-white px-5 py-2 text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors">
+      <div className="flex items-center space-x-3 md:space-x-6">
+        <button className="bg-black text-white px-3 md:px-5 py-2 text-[10px] md:text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors shrink-0">
           New Export
         </button>
-        <div className="flex items-center space-x-4">
-          <button className="text-gray-500 hover:text-black transition-colors">
+        <div className="flex items-center space-x-2 md:space-x-4">
+          <button className="text-gray-500 hover:text-black transition-colors hidden xs:block">
             <Bell size={20} />
           </button>
-          <div className="w-8 h-8 bg-gray-200 overflow-hidden">
+          <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-100">
             <img 
               src="https://picsum.photos/seed/user/100/100" 
               alt="User" 
@@ -147,12 +174,12 @@ const CreatorModal = ({ isOpen, onClose, onSave, initialData }: { isOpen: boolea
         animate={{ opacity: 1, scale: 1 }}
         className="bg-white w-full max-w-4xl max-h-[95vh] flex flex-col shadow-2xl border border-gray-200"
       >
-        <div className="p-10 border-b border-gray-200 flex justify-between items-start">
-          <div className="flex items-center gap-6">
-            <div className="w-1.5 h-12 bg-[#276EF1]"></div>
+        <div className="p-6 md:p-10 border-b border-gray-200 flex justify-between items-start">
+          <div className="flex items-center gap-4 md:gap-6">
+            <div className="w-1 md:w-1.5 h-10 md:h-12 bg-[#276EF1]"></div>
             <div>
-              <span className="block text-[10px] uppercase tracking-[0.2em] font-black text-gray-500 mb-1">Curation Engine</span>
-              <h1 className="text-4xl font-black tracking-tighter text-black uppercase">{initialData ? 'Edit Creator' : 'Add New Creator'}</h1>
+              <span className="block text-[8px] md:text-[10px] uppercase tracking-[0.2em] font-black text-gray-500 mb-1">Curation Engine</span>
+              <h1 className="text-2xl md:text-4xl font-black tracking-tighter text-black uppercase">{initialData ? 'Edit Creator' : 'Add New Creator'}</h1>
             </div>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 transition-colors">
@@ -160,7 +187,7 @@ const CreatorModal = ({ isOpen, onClose, onSave, initialData }: { isOpen: boolea
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-10 space-y-16 scrollbar-hide">
+        <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-10 md:space-y-16 scrollbar-hide">
           <section>
             <div className="flex items-center gap-4 mb-8">
               <h2 className="text-xs font-black uppercase tracking-[0.3em] text-[#276EF1]">01 / Identity</h2>
@@ -327,7 +354,7 @@ const DashboardView = ({ creators, onSearch }: { creators: Creator[], onSearch: 
   const avgEngagement = (creators.reduce((acc, c) => acc + (Number(c.engagement_rate) || 0), 0) / (creators.length || 1)).toFixed(1);
 
   return (
-    <div className="pt-28 pb-20 px-12 max-w-6xl">
+    <div className="pt-8 md:pt-28 pb-20 px-4 md:px-12 max-w-6xl">
       <section className="mb-16">
         <div className="mb-10">
           <h2 className="text-4xl font-black tracking-tight text-black mb-2 uppercase">Creator Search</h2>
@@ -349,7 +376,7 @@ const DashboardView = ({ creators, onSearch }: { creators: Creator[], onSearch: 
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div className="space-y-1">
             <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Size</label>
             <select 
@@ -396,10 +423,10 @@ const DashboardView = ({ creators, onSearch }: { creators: Creator[], onSearch: 
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-center gap-4">
           <button 
             onClick={() => onSearch(filters)}
-            className="w-full md:w-auto px-10 py-4 bg-[#276EF1] text-white font-bold text-sm uppercase tracking-widest hover:bg-blue-700 transition-colors flex items-center justify-center"
+            className="w-full sm:w-auto px-10 py-4 bg-[#276EF1] text-white font-bold text-sm uppercase tracking-widest hover:bg-blue-700 transition-colors flex items-center justify-center"
           >
             <Search className="mr-2" size={18} />
             Execute Search
@@ -410,7 +437,7 @@ const DashboardView = ({ creators, onSearch }: { creators: Creator[], onSearch: 
               setFilters(reset);
               onSearch(reset);
             }}
-            className="w-full md:w-auto px-10 py-4 bg-gray-100 text-black font-bold text-sm uppercase tracking-widest hover:bg-gray-200 transition-colors"
+            className="w-full sm:w-auto px-10 py-4 bg-gray-100 text-black font-bold text-sm uppercase tracking-widest hover:bg-gray-200 transition-colors"
           >
             Reset Filters
           </button>
@@ -418,7 +445,7 @@ const DashboardView = ({ creators, onSearch }: { creators: Creator[], onSearch: 
       </section>
 
       <section>
-        <div className="flex justify-between items-end mb-8 border-b border-gray-100 pb-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 border-b border-gray-100 pb-4 gap-4">
           <div>
             <h3 className="text-xl font-bold text-black uppercase tracking-tight">Active Inventory Intel</h3>
             <p className="text-gray-500 text-xs mt-1">Real-time data from your connected Google Sheet</p>
@@ -429,35 +456,35 @@ const DashboardView = ({ creators, onSearch }: { creators: Creator[], onSearch: 
         </div>
 
         <div className="grid grid-cols-12 gap-6">
-          <div className="col-span-12 md:col-span-8 border border-gray-200 p-8 flex flex-col justify-between">
+          <div className="col-span-12 lg:col-span-8 border border-gray-200 p-6 md:p-8 flex flex-col justify-between">
             {topPerformer ? (
               <>
                 <div>
                   <div className="inline-block px-2 py-1 bg-black text-white text-[9px] font-bold uppercase tracking-widest mb-6">Top Performer</div>
-                  <h4 className="text-4xl font-black mb-3">{topPerformer.name}</h4>
+                  <h4 className="text-3xl md:text-4xl font-black mb-3">{topPerformer.name}</h4>
                   <p className="text-gray-600 text-sm leading-relaxed max-w-lg mb-8">
                     Dominating the <span className="text-black font-bold">{topPerformer.category}</span> vertical with 
                     average views exceeding <span className="text-[#276EF1] font-bold">{formatNumber(topPerformer.avg_views)}</span> per post.
                     Verified influence in {topPerformer.primary_location}.
                   </p>
                 </div>
-                <div className="grid grid-cols-3 gap-0 border-t border-gray-100 pt-8">
-                  <div className="border-r border-gray-100 pr-6">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-0 border-t border-gray-100 pt-8">
+                  <div className="sm:border-r border-gray-100 sm:pr-6">
                     <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-1">Followers</p>
-                    <p className="text-3xl font-black text-black">{formatNumber(topPerformer.followers_count)}</p>
+                    <p className="text-2xl md:text-3xl font-black text-black">{formatNumber(topPerformer.followers_count)}</p>
                   </div>
-                  <div className="border-r border-gray-100 px-6">
+                  <div className="sm:border-r border-gray-100 sm:px-6">
                     <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-1">Engagement</p>
-                    <p className="text-3xl font-black text-[#276EF1]">{topPerformer.engagement_rate}%</p>
+                    <p className="text-2xl md:text-3xl font-black text-[#276EF1]">{topPerformer.engagement_rate}%</p>
                   </div>
-                  <div className="pl-6">
+                  <div className="sm:pl-6">
                     <p className="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-1">Avg Views</p>
-                    <p className="text-3xl font-black text-black">{formatNumber(topPerformer.avg_views)}</p>
+                    <p className="text-2xl md:text-3xl font-black text-black">{formatNumber(topPerformer.avg_views)}</p>
                   </div>
                 </div>
               </>
             ) : (
-              <div className="flex items-center justify-center h-full">
+              <div className="flex items-center justify-center h-full py-12">
                 <p className="text-gray-400 font-bold uppercase tracking-widest">Loading metrics...</p>
               </div>
             )}
@@ -552,7 +579,7 @@ const CreatorDetailPanel = ({ isOpen, onClose, creator, onSave }: { isOpen: bool
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed top-0 right-0 h-screen w-[750px] bg-white z-[70] shadow-2xl flex flex-col"
+            className="fixed top-0 right-0 h-screen w-full sm:w-[500px] md:w-[750px] bg-white z-[70] shadow-2xl flex flex-col"
           >
             <div className="px-8 py-6 flex items-center justify-between border-b border-gray-100">
               <div className="flex items-center gap-5">
@@ -735,14 +762,14 @@ const CreatorsListView = ({
   };
 
   return (
-    <div className="pt-24 px-10 pb-10">
+    <div className="pt-8 md:pt-24 px-4 md:px-10 pb-10">
       <div className="mb-8">
         <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-1">
           <span>Inventory</span>
           <ChevronRight size={12} />
           <span className="text-black">Discovery</span>
         </div>
-        <h2 className="text-4xl font-extrabold tracking-tight uppercase">Search Results</h2>
+        <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight uppercase">Search Results</h2>
       </div>
 
       {isBulkScraping && (
@@ -767,12 +794,12 @@ const CreatorsListView = ({
         </div>
       )}
 
-      <div className="flex border border-gray-100 mb-8 divide-x divide-gray-100">
-        <div className="flex-1 p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border border-gray-100 mb-8 divide-y sm:divide-y-0 sm:divide-x divide-gray-100">
+        <div className="p-4 md:p-6">
           <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-1">Total Creators</p>
           <p className="text-2xl font-bold">{Array.isArray(creators) ? creators.length : 0}</p>
         </div>
-        <div className="flex-1 p-6">
+        <div className="p-4 md:p-6">
           <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-1">Platform Avg. Views</p>
           <p className="text-2xl font-bold text-[#276EF1]">
             {Array.isArray(creators) 
@@ -780,13 +807,13 @@ const CreatorsListView = ({
               : "0"}
           </p>
         </div>
-        <div className="flex-1 p-6 flex items-center justify-between">
-          <div className="flex-1 flex gap-2 items-center">
-            <div className="relative flex-1">
+        <div className="sm:col-span-2 lg:col-span-1 p-4 md:p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="w-full flex flex-col sm:flex-row gap-2 items-center">
+            <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
               <input 
                 type="text"
-                placeholder="Search name or handle..."
+                placeholder="Search database..."
                 className="w-full bg-gray-50 border border-gray-100 py-2 pl-10 pr-10 text-xs font-medium focus:border-black outline-none"
                 value={activeFilters?.name || ''}
                 onChange={(e) => onSearch?.({ ...activeFilters, name: e.target.value })}
@@ -973,43 +1000,43 @@ const HealthCheckView = ({ onRefresh }: { onRefresh: () => void }) => {
 
   if (loading) {
     return (
-      <div className="pt-24 px-10 flex items-center justify-center h-screen">
+      <div className="pt-8 md:pt-24 px-4 md:px-10 flex items-center justify-center h-[calc(100vh-100px)]">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
       </div>
     );
   }
 
   return (
-    <div className="pt-24 px-10 pb-10 max-w-5xl">
-      <div className="mb-12">
+    <div className="pt-8 md:pt-24 px-4 md:px-10 pb-10 max-w-5xl">
+      <div className="mb-8 md:mb-12">
         <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-1">
           <span>System</span>
           <ChevronRight size={12} />
           <span className="text-black">Health Check</span>
         </div>
-        <h2 className="text-4xl font-extrabold tracking-tight uppercase">Sheet Integration Status</h2>
+        <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight uppercase">Sheet Integration Status</h2>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-        <div className="border border-gray-100 p-8 bg-white">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-12">
+        <div className="border border-gray-100 p-6 md:p-8 bg-white">
           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Connection Status</p>
           <div className="flex items-center gap-3">
             <div className={cn(
               "w-3 h-3 rounded-full",
               health?.status === 'connected' ? "bg-green-500" : "bg-red-500"
             )}></div>
-            <p className="text-2xl font-black uppercase tracking-tight">
+            <p className="text-xl md:text-2xl font-black uppercase tracking-tight">
               {health?.status === 'connected' ? 'Connected' : 'Error'}
             </p>
           </div>
         </div>
-        <div className="border border-gray-100 p-8 bg-white">
+        <div className="border border-gray-100 p-6 md:p-8 bg-white">
           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Spreadsheet ID</p>
           <p className="text-sm font-mono truncate text-gray-600">{health?.spreadsheetId}</p>
         </div>
-        <div className="border border-gray-100 p-8 bg-white">
+        <div className="border border-gray-100 p-6 md:p-8 bg-white sm:col-span-2 md:col-span-1">
           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Active Sheet</p>
-          <p className="text-2xl font-black uppercase tracking-tight">{health?.details?.activeSheet || 'N/A'}</p>
+          <p className="text-xl md:text-2xl font-black uppercase tracking-tight">{health?.details?.activeSheet || 'N/A'}</p>
         </div>
       </div>
 
@@ -1144,6 +1171,7 @@ export default function App() {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [editingCreator, setEditingCreator] = useState<Creator | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [sortConfig, setSortConfig] = useState<{ key: string, order: 'asc' | 'desc' }>({ key: 'name', order: 'asc' });
   const [isBulkScraping, setIsBulkScraping] = useState(false);
   const [bulkScrapeProgress, setBulkScrapeProgress] = useState({ current: 0, total: 0 });
@@ -1291,10 +1319,18 @@ export default function App() {
   return (
     <div className="min-h-screen bg-white">
       <Toaster position="top-right" />
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-      <Header onAddClick={() => { setEditingCreator(null); setIsModalOpen(true); }} />
+      <Sidebar 
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab} 
+        isOpen={isSidebarOpen} 
+        onClose={() => setIsSidebarOpen(false)} 
+      />
+      <Header 
+        onAddClick={() => { setEditingCreator(null); setIsModalOpen(true); }} 
+        onMenuClick={() => setIsSidebarOpen(true)}
+      />
 
-      <main className="ml-64 min-h-screen">
+      <main className="md:ml-64 min-h-screen pt-16">
         {activeTab === 'dashboard' && (
           <DashboardView creators={creators} onSearch={(f) => { fetchCreators(f, sortConfig, true); setActiveTab('creators'); }} />
         )}

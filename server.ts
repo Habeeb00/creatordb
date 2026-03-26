@@ -747,12 +747,10 @@ async function startServer() {
       });
     } catch (error: any) {
       console.error("Bulk scrape error:", error);
-      res
-        .status(500)
-        .json({
-          error: "Failed to bulk update metrics",
-          details: error.message,
-        });
+      res.status(500).json({
+        error: "Failed to bulk update metrics",
+        details: error.message,
+      });
     }
   });
 
@@ -914,12 +912,10 @@ async function startServer() {
       });
     } catch (error: any) {
       console.error("Bulk profile pic error:", error);
-      res
-        .status(500)
-        .json({
-          error: "Failed to bulk update profile pictures",
-          details: error.message,
-        });
+      res.status(500).json({
+        error: "Failed to bulk update profile pictures",
+        details: error.message,
+      });
     }
   });
 
@@ -974,11 +970,9 @@ async function startServer() {
       if (reels.length === 0) {
         // Fallback: if no reels found, maybe they are just posts?
         // But user specifically asked for reels.
-        return res
-          .status(404)
-          .json({
-            error: "No reels found for this creator in the latest posts",
-          });
+        return res.status(404).json({
+          error: "No reels found for this creator in the latest posts",
+        });
       }
 
       const totalViews = reels.reduce(
@@ -1073,12 +1067,10 @@ async function startServer() {
       });
     } catch (error: any) {
       console.error("Scraping error:", error);
-      res
-        .status(500)
-        .json({
-          error: "Failed to scrape Instagram data",
-          details: error.message,
-        });
+      res.status(500).json({
+        error: "Failed to scrape Instagram data",
+        details: error.message,
+      });
     }
   });
 
